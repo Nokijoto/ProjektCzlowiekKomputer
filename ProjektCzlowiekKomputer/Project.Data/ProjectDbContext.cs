@@ -15,6 +15,9 @@ namespace Project.Data
         public DbSet<Book> Books { get; set; }
         public DbSet<Author> Authors { get; set; }
         public DbSet<BooksAuthors> BooksAuthors { get; set; }
+        public DbSet<Shelves> Shelves { get; set; }
+        public DbSet<BookShelves> BookShelves { get; set; }
+
         public ProjectDbContext(DbContextOptions<ProjectDbContext> options) : base(options)
         {
 
@@ -40,6 +43,18 @@ namespace Project.Data
                 .HasOne(ba => ba.Author)
                 .WithMany(a => a.BooksAuthors)
                 .HasForeignKey(ba => ba.AuthorId);
+
+            modelBuilder.Entity<BookShelves>()
+                .HasKey(bs => new { bs.BookId, bs.ShelvesId });
+            modelBuilder.Entity<BookShelves>()
+                .HasOne(bs => bs.Book)
+                .WithMany(b => b.BookShelves)
+                .HasForeignKey(bs => bs.BookId);
+            modelBuilder.Entity<BookShelves>()
+                .HasOne(bs => bs.Shelves)
+                .WithMany(s => s.BookShelves)
+                .HasForeignKey(bs => bs.ShelvesId);
+
         }
     }
 }

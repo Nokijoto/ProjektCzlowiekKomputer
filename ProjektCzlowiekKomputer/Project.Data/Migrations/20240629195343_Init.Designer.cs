@@ -12,8 +12,8 @@ using Project.Data;
 namespace Project.Data.Migrations
 {
     [DbContext(typeof(ProjectDbContext))]
-    [Migration("20240629143923_UpdateBooks3")]
-    partial class UpdateBooks3
+    [Migration("20240629195343_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -280,6 +280,45 @@ namespace Project.Data.Migrations
                     b.ToTable("books");
                 });
 
+            modelBuilder.Entity("Project.Data.Entities.BookShelves", b =>
+                {
+                    b.Property<int>("BookId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ShelvesId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("BookGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("Guid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ShelvesGuid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("BookId", "ShelvesId");
+
+                    b.HasIndex("ShelvesId");
+
+                    b.ToTable("BookShelves");
+                });
+
             modelBuilder.Entity("Project.Data.Entities.BooksAuthors", b =>
                 {
                     b.Property<int>("BookId")
@@ -317,6 +356,42 @@ namespace Project.Data.Migrations
                     b.HasIndex("AuthorId");
 
                     b.ToTable("BooksAuthors");
+                });
+
+            modelBuilder.Entity("Project.Data.Entities.Shelves", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("Guid")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Shelves");
                 });
 
             modelBuilder.Entity("Project.Data.Models.UserModel", b =>
@@ -439,6 +514,25 @@ namespace Project.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Project.Data.Entities.BookShelves", b =>
+                {
+                    b.HasOne("Project.Data.Entities.Book", "Book")
+                        .WithMany("BookShelves")
+                        .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Project.Data.Entities.Shelves", "Shelves")
+                        .WithMany("BookShelves")
+                        .HasForeignKey("ShelvesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Book");
+
+                    b.Navigation("Shelves");
+                });
+
             modelBuilder.Entity("Project.Data.Entities.BooksAuthors", b =>
                 {
                     b.HasOne("Project.Data.Entities.Author", "Author")
@@ -465,7 +559,14 @@ namespace Project.Data.Migrations
 
             modelBuilder.Entity("Project.Data.Entities.Book", b =>
                 {
+                    b.Navigation("BookShelves");
+
                     b.Navigation("BooksAuthors");
+                });
+
+            modelBuilder.Entity("Project.Data.Entities.Shelves", b =>
+                {
+                    b.Navigation("BookShelves");
                 });
 #pragma warning restore 612, 618
         }

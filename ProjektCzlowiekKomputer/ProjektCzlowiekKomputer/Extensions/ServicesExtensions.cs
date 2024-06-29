@@ -14,6 +14,7 @@ namespace ProjektCzlowiekKomputer.Extensions
             serviceCollection.AddTransient<IAuthService, AuthService>();
             serviceCollection.AddTransient<IBookService, BookService>();
             serviceCollection.AddTransient<IAuthorService, AuthorService>();
+            serviceCollection.AddTransient<IShelveService, ShelveService>();
             return serviceCollection;
         }
 

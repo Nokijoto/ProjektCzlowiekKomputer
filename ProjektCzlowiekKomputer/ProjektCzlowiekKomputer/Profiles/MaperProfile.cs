@@ -21,6 +21,15 @@ namespace ProjektCzlowiekKomputer.Profiles
             CreateMap<Author, UpdateAuthorDto>().ReverseMap();
 
             CreateMap<BooksAuthors, BooksAuthorsDto>().ReverseMap();
+
+            CreateMap<Shelves, ShelveDto>().ReverseMap();
+            CreateMap<ShelveDto, CreateShelveDto>().ReverseMap();
+            CreateMap<Shelves, CreateShelveDto>().ReverseMap();
+            CreateMap<Shelves, UpdateShelveDto>().ReverseMap();
+
+            CreateMap<BookShelves, BookShelvesDto>().ReverseMap();
+
+
         }
     }
 }

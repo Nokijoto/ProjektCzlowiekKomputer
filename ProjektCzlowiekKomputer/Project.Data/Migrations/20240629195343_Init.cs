@@ -52,6 +52,77 @@ namespace Project.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Authors",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Surname = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Country = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    About = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Authors", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "books",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    ISBN = table.Column<string>(type: "nvarchar(17)", maxLength: 17, nullable: false),
+                    Genre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    PublicationDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Publisher = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    NumberOfPages = table.Column<int>(type: "int", nullable: true),
+                    Language = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CoverImage = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Edition = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Format = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Rating = table.Column<float>(type: "real", nullable: false),
+                    Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_books", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Shelves",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Shelves", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -157,6 +228,70 @@ namespace Project.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "BooksAuthors",
+                columns: table => new
+                {
+                    BookId = table.Column<int>(type: "int", nullable: false),
+                    AuthorId = table.Column<int>(type: "int", nullable: false),
+                    BookGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AuthorGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BooksAuthors", x => new { x.BookId, x.AuthorId });
+                    table.ForeignKey(
+                        name: "FK_BooksAuthors_Authors_AuthorId",
+                        column: x => x.AuthorId,
+                        principalTable: "Authors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BooksAuthors_books_BookId",
+                        column: x => x.BookId,
+                        principalTable: "books",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BookShelves",
+                columns: table => new
+                {
+                    BookId = table.Column<int>(type: "int", nullable: false),
+                    ShelvesId = table.Column<int>(type: "int", nullable: false),
+                    BookGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ShelvesGuid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    Guid = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BookShelves", x => new { x.BookId, x.ShelvesId });
+                    table.ForeignKey(
+                        name: "FK_BookShelves_Shelves_ShelvesId",
+                        column: x => x.ShelvesId,
+                        principalTable: "Shelves",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BookShelves_books_BookId",
+                        column: x => x.BookId,
+                        principalTable: "books",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -195,6 +330,16 @@ namespace Project.Data.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BooksAuthors_AuthorId",
+                table: "BooksAuthors",
+                column: "AuthorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BookShelves_ShelvesId",
+                table: "BookShelves",
+                column: "ShelvesId");
         }
 
         /// <inheritdoc />
@@ -216,10 +361,25 @@ namespace Project.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "BooksAuthors");
+
+            migrationBuilder.DropTable(
+                name: "BookShelves");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Authors");
+
+            migrationBuilder.DropTable(
+                name: "Shelves");
+
+            migrationBuilder.DropTable(
+                name: "books");
         }
     }
 }
