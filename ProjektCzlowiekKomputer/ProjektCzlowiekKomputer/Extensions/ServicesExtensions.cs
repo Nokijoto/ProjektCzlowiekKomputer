@@ -13,6 +13,7 @@ namespace ProjektCzlowiekKomputer.Extensions
         {
             serviceCollection.AddTransient<IAuthService, AuthService>();
             serviceCollection.AddTransient<IBookService, BookService>();
+            serviceCollection.AddTransient<IAuthorService, AuthorService>();
             return serviceCollection;
         }
 

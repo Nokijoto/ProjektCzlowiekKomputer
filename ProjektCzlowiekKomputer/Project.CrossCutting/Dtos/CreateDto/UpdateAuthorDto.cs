@@ -1,14 +1,14 @@
-﻿using Project.CrossCutting.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Project.CrossCutting.Dtos
+namespace Project.CrossCutting.Dtos.CreateDto
 {
-    public class AuthorDto:BaseDto
+    public class UpdateAuthorDto
     {
+        public Guid Guid { get; set; }
         public string Name { get; set; }
         public string Surname { get; set; }
         public string Description { get; set; }
@@ -16,7 +16,5 @@ namespace Project.CrossCutting.Dtos
         public string Country { get; set; }
         public string About { get; set; }
 
-
-        public ICollection<BookAuthorsDto> BooksAuthors { get; set; }
     }
 }
