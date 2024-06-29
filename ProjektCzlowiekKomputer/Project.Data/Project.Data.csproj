@@ -15,4 +15,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Project.CrossCutting\Project.CrossCutting.csproj" />
+  </ItemGroup>
+
 </Project>

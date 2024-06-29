@@ -9,10 +9,11 @@ namespace ProjektCzlowiekKomputer.Extensions
     public static class ServicesExtensions
     {
 
-
         public static IServiceCollection AddCustomServices(this IServiceCollection serviceCollection)
         {
             serviceCollection.AddTransient<IAuthService, AuthService>();
+            serviceCollection.AddTransient<IBookService, BookService>();
+            serviceCollection.AddTransient<IAuthorService, AuthorService>();
             return serviceCollection;
         }
 
