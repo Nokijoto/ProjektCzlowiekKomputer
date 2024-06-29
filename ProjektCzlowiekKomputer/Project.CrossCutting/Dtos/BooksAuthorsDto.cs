@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Project.CrossCutting.Dtos
 {
-    public class BookAuthorsDto:BaseDto
+    public class BooksAuthorsDto:BaseDto
     {
         public int BookId { get; set; }
         public Guid BookGuid { get; set; }

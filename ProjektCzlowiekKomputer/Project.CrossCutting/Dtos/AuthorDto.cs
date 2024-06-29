@@ -17,6 +17,6 @@ namespace Project.CrossCutting.Dtos
         public string About { get; set; }
 
 
-        public ICollection<BookAuthorsDto> BooksAuthors { get; set; }
+        public ICollection<BooksAuthorsDto> BooksAuthors { get; set; }
     }
 }

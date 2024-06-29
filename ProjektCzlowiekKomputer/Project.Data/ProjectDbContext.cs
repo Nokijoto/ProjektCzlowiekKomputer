@@ -29,19 +29,17 @@ namespace Project.Data
         public void BaseConfig(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<BooksAuthors>()
-                .HasKey(ba => new { ba.BookId, ba.AuthorId });
+                    .HasKey(ba => new { ba.BookId, ba.AuthorId });
 
             modelBuilder.Entity<BooksAuthors>()
-                .HasOne(ba => ba.Book)
-                .WithMany(b => b.BooksAuthors)
-                .HasForeignKey(ba => ba.BookId);
+               .HasOne(ba => ba.Book)
+               .WithMany(b => b.BooksAuthors)
+               .HasForeignKey(ba => ba.BookId);
 
             modelBuilder.Entity<BooksAuthors>()
                 .HasOne(ba => ba.Author)
                 .WithMany(a => a.BooksAuthors)
                 .HasForeignKey(ba => ba.AuthorId);
-
-
         }
     }
 }

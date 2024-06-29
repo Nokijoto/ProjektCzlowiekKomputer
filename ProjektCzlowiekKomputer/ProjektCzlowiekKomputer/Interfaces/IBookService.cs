@@ -20,5 +20,7 @@ namespace ProjektCzlowiekKomputer.Interfaces
         public Task<CrudOperationResult<BookDto>> GetBookByLanguageAsync(string language);
         public Task<CrudOperationResult<BookDto>> GetBookByRatingAsync(int rating);
         public Task<CrudOperationResult<List<BookDto>>> GetBooksByFilterAsync(BookFilterDto filter);
+
+        
     }
 }

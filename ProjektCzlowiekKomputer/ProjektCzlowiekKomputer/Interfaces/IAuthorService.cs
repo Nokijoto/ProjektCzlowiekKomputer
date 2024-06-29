@@ -11,5 +11,7 @@ namespace ProjektCzlowiekKomputer.Interfaces
         Task<CrudOperationResult<AuthorDto>> DeleteAuthorAsync(Guid authorId);
         Task<CrudOperationResult<AuthorDto>> GetAuthorAsync(Guid authorId);
         Task<CrudOperationResult<List<AuthorDto>>> GetAuthorsAsync();
+        Task<CrudOperationResult<BooksAuthorsDto>> AddAuthorsBooksAsync(Guid bookGuid, Guid authorGuid);
+        Task<CrudOperationResult<List<BookDto>>> GetAuthorsBooksAsync(Guid authorGuid);
     }
 }

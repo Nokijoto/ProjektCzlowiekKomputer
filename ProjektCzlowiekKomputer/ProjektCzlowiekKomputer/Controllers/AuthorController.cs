@@ -45,5 +45,21 @@ namespace ProjektCzlowiekKomputer.Controllers
             return Ok(result);
         }
 
+        [HttpPost]
+        [Route("AddAuthorsBooks")]
+        public async Task<IActionResult> AddAuthorsBooks(Guid bookGuid, Guid authorGuid)
+        {
+            var result = await _authorService.AddAuthorsBooksAsync(bookGuid, authorGuid);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("GetAuthorsBooks")]
+        public async Task<IActionResult> GetAuthorsBooks(Guid authorGuid)
+        {
+            var result = await _authorService.GetAuthorsBooksAsync(authorGuid);
+            return Ok(result);
+        }
+
     }
 }

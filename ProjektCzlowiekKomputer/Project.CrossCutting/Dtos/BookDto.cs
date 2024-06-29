@@ -23,6 +23,6 @@ namespace Project.CrossCutting.Dtos
         public string Format { get; set; }
         public float Rating { get; set; }
 
-        public ICollection<BookAuthorsDto> BooksAuthors { get; set; }
+        public ICollection<BooksAuthorsDto> BooksAuthors { get; set; }
     }
 }
