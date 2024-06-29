@@ -6,12 +6,12 @@ namespace ProjektCzlowiekKomputer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class ProfileController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly ILogger<AuthController> _logger;
+        private readonly ILogger<ProfileController> _logger;
 
-        public AuthController(IAuthService authService, ILogger<AuthController> logger)
+        public ProfileController(IAuthService authService, ILogger<ProfileController> logger)
         {
             _authService = authService;
             _logger = logger;
@@ -83,5 +83,6 @@ namespace ProjektCzlowiekKomputer.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
     }
 }

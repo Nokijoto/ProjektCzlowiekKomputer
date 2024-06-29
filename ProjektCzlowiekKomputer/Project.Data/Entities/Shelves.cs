@@ -12,5 +12,6 @@ namespace Project.Data.Entities
         public string Name { get; set; }
         public string Description { get; set; }
         public ICollection<BookShelves> BookShelves { get; set; }
+        public ICollection<UserShelves> UserShelves { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Project.CrossCutting.Dtos;
 using Project.CrossCutting.Dtos.CreateDto;
 using ProjektCzlowiekKomputer.Interfaces;
@@ -9,6 +10,7 @@ namespace ProjektCzlowiekKomputer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class BookController : ControllerBase
     {
         private readonly IBookService _bookService;
@@ -18,6 +20,7 @@ namespace ProjektCzlowiekKomputer.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetBooks()
         {
             var result = await _bookService.GetBooksAsync();
@@ -25,6 +28,7 @@ namespace ProjektCzlowiekKomputer.Controllers
         }
 
         [HttpGet("id")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetBookById(int id)
         {
             var result = await _bookService.GetBookByIdAsync(id);
@@ -32,6 +36,7 @@ namespace ProjektCzlowiekKomputer.Controllers
         }
 
         [HttpGet("guid")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetBookByGuid(string guid)
         {
             var result = await _bookService.GetBookByGuidAsync(guid);
@@ -39,6 +44,7 @@ namespace ProjektCzlowiekKomputer.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddBook([FromBody] CreateBookDto bookDto)
         {
             var result = await _bookService.AddBookAsync(bookDto);
@@ -46,6 +52,7 @@ namespace ProjektCzlowiekKomputer.Controllers
         }
 
         [HttpPut("guid")]
+        [Authorize]
         public async Task<IActionResult> UpdateBook([FromBody] UpdateBookDto bookDto, Guid guid)
         {
             var result = await _bookService.UpdateBookAsync(bookDto, guid);
@@ -53,6 +60,7 @@ namespace ProjektCzlowiekKomputer.Controllers
         }
 
         [HttpDelete]
+        [Authorize]
         public async Task<IActionResult> DeleteBook(int id)
         {
             var result = await _bookService.DeleteBookAsync(id);
@@ -60,6 +68,7 @@ namespace ProjektCzlowiekKomputer.Controllers
         }
 
         [HttpGet("filter")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetBooksByFilter([FromQuery] BookFilterDto filter)
         {
             var result = await _bookService.GetBooksByFilterAsync(filter);

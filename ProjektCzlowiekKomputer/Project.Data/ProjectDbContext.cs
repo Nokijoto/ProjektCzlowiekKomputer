@@ -18,6 +18,8 @@ namespace Project.Data
         public DbSet<Shelves> Shelves { get; set; }
         public DbSet<BookShelves> BookShelves { get; set; }
 
+        public DbSet<UserShelves> UserShelves { get; set; }
+
         public ProjectDbContext(DbContextOptions<ProjectDbContext> options) : base(options)
         {
 
@@ -54,6 +56,19 @@ namespace Project.Data
                 .HasOne(bs => bs.Shelves)
                 .WithMany(s => s.BookShelves)
                 .HasForeignKey(bs => bs.ShelvesId);
+
+            modelBuilder.Entity<UserShelves>()
+             .HasOne(us => us.User)
+             .WithMany(u => u.UserShelves)
+             .HasForeignKey(us => us.UserGuid)
+             .HasPrincipalKey(u => u.UserGuid);
+
+            modelBuilder.Entity<UserShelves>()
+                .HasOne(us => us.Shelves)
+                .WithMany(s => s.UserShelves)
+                .HasForeignKey(us => us.ShelvesGuid)
+                .HasPrincipalKey(s => s.Guid);
+
 
         }
     }

@@ -82,10 +82,14 @@ namespace ProjektCzlowiekKomputer.Services
             }
         }
 
-        public async Task<CrudOperationResult<ShelveDto>> AddShelve(CreateShelveDto shelveDto)
+        public async Task<CrudOperationResult<ShelveDto>> AddShelve(CreateShelveDto shelveDto, Guid userGuid)
         {
             try
             {
+                var user = await _db.Users.SingleOrDefaultAsync(x => x.UserGuid == userGuid);
+
+
+
                 var shelve = _mapper.Map<Shelves>(shelveDto);
                 shelve.UpdatedBy = null;
                 shelve.CreatedBy = "API";
@@ -95,7 +99,23 @@ namespace ProjektCzlowiekKomputer.Services
 
                 await _db.Shelves.AddAsync(shelve);
                 await _db.SaveChangesAsync();
+
                 var newShelve = await _db.Shelves.FirstOrDefaultAsync(x => x.Guid == shelve.Guid);
+                var userShelve= new UserShelves()
+                {
+                    Shelves = newShelve,
+                    User = user,
+                    UserGuid = user.UserGuid,
+                    ShelvesGuid = newShelve.Guid,
+                    ShelvesId = newShelve.Id,
+                    UserId = user.Id,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
+                    CreatedBy = "API",
+                    UpdatedBy = null,
+                    Guid = Guid.NewGuid()
+                };
+
                 return new CrudOperationResult<ShelveDto>()
                 {
                     Message = "Shelve added successfully",
