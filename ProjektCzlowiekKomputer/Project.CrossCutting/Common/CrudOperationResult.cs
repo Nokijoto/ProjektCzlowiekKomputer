@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace Project.CrossCutting.Common
 {
-    public abstract class CrudOperationResult<TDto>
+    public  class CrudOperationResult<TDto>
     {
         public CrudOperationResultStatus Status { get; set; }
 
         public TDto? Result { get; set; }
+        public String? Message { get; set; }
     }
 }

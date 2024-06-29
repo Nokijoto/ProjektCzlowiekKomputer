@@ -14,7 +14,7 @@ builder.Services.AddControllers();
 
 
 builder.Services.AddDbContext<ProjectDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("ProjectDbContextConnection")));
-
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddIdentityServices();
 
 
@@ -70,6 +70,10 @@ builder.Services.AddSwaggerGen(option =>
         }
     });
 });
+
+
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
