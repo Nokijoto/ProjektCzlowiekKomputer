@@ -369,10 +369,69 @@ namespace ProjektCzlowiekKomputer.Services
 
         public async Task<CrudOperationResult<List<BookDto>>> GetBooksByFilterAsync(BookFilterDto filter)
         {
-           throw new Exception("Not implemented yet");
-        }
-        
+            try
+            {
+                IQueryable<Book> query = _db.Books.Include(b => b.BooksAuthors).ThenInclude(ba => ba.Author);
 
-        
+                if (filter.Id.HasValue)
+                {
+                    query = query.Where(book => book.Id == filter.Id.Value);
+                }
+                if (filter.Guid.HasValue)
+                {
+                    query = query.Where(book => book.Guid == filter.Guid.Value);
+                }
+                if (!string.IsNullOrEmpty(filter.Isbn))
+                {
+                    query = query.Where(book => book.ISBN.Contains(filter.Isbn));
+                }
+                if (!string.IsNullOrEmpty(filter.Title))
+                {
+                    query = query.Where(book => book.Title.Contains(filter.Title));
+                }
+                if (!string.IsNullOrEmpty(filter.Author))
+                {
+                    query = query.Where(book => book.BooksAuthors.Any(ba => ba.Author.Name.Contains(filter.Author)));
+                }
+                if (!string.IsNullOrEmpty(filter.Genre))
+                {
+                    query = query.Where(book => book.Genre.Contains(filter.Genre));
+                }
+                if (!string.IsNullOrEmpty(filter.Publisher))
+                {
+                    query = query.Where(book => book.Publisher.Contains(filter.Publisher));
+                }
+                if (!string.IsNullOrEmpty(filter.Language))
+                {
+                    query = query.Where(book => book.Language.Contains(filter.Language));
+                }
+                if (filter.Rating.HasValue)
+                {
+                    query = query.Where(book => book.Rating >= filter.Rating.Value);
+                }
+
+                var books = await query.ToListAsync();
+                var bookDtos = books.Select(book => _mapper.Map<BookDto>(book)).ToList();
+
+                return new CrudOperationResult<List<BookDto>>
+                {
+                    Message = "Books retrieved successfully",
+                    Status = CrudOperationResultStatus.Success,
+                    Result = bookDtos
+                };
+            }
+            catch (Exception e)
+            {
+                return new CrudOperationResult<List<BookDto>>
+                {
+                    Message = $"An error occurred while retrieving books {e.Message}",
+                    Status = CrudOperationResultStatus.Failure,
+                    Result = null
+                };
+            }
+        }
+
+
+
     }
 }

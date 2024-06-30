@@ -1,15 +1,15 @@
 ﻿namespace Project.CrossCutting.Dtos
 {
-    public enum BookFilterDto
+    public class BookFilterDto
     {
-        Id,
-        Guid,
-        Isbn,
-        Title,
-        Author,
-        Genre,
-        Publisher,
-        Language,
-        Rating
+        public int? Id { get; set; }
+        public Guid? Guid { get; set; }
+        public string? Isbn { get; set; }
+        public string? Title { get; set; }
+        public string? Author { get; set; }
+        public string? Genre { get; set; }
+        public string? Publisher { get; set; }
+        public string? Language { get; set; }
+        public double? Rating { get; set; }
     }
 }

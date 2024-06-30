@@ -10,7 +10,7 @@ namespace ProjektCzlowiekKomputer.Profiles
         public MaperProfile()
         {
             CreateMap<Book, BookDto>().ReverseMap();
-            CreateMap<BookDto,CreateBookDto>().ReverseMap();
+            CreateMap<BookDto, CreateBookDto>().ReverseMap();
             CreateMap<Book, CreateBookDto>().ReverseMap();
             CreateMap<Book, UpdateBookDto>().ReverseMap();
 
