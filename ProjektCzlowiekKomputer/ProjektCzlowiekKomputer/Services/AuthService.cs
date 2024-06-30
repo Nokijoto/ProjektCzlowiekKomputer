@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Project.CrossCutting.Common;
 using Project.CrossCutting.Dtos;
 using Project.CrossCutting.Dtos.CreateDto;
+using Project.Data;
 using Project.Data.Models;
 using ProjektCzlowiekKomputer.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,22 +15,24 @@ namespace ProjektCzlowiekKomputer.Services
 {
     public class AuthService: IAuthService
     {
-        private readonly UserManager<UserModel> userManager;
-        private readonly RoleManager<IdentityRole> roleManager;
+        private readonly UserManager<UserModel> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IShelveService _shelveService;
         private readonly IConfiguration _configuration;
-        public AuthService(UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, IShelveService shelveService)
+        private readonly ProjectDbContext _db;
+        public AuthService(UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, IShelveService shelveService, ProjectDbContext db)
         {
-            this.userManager = userManager;
-            this.roleManager = roleManager;
+            _userManager = userManager;
+            _roleManager = roleManager;
             _configuration = configuration;
             _shelveService = shelveService;
+            _db = db;
         }
         public async Task<(int, string)> Registeration(RegistrationModel model, string role)
         {
             try
             {
-                var userExists = await userManager.FindByNameAsync(model.Username);
+                var userExists = await _userManager.FindByNameAsync(model.Username);
                 if (userExists != null)
                     return (0, "User already exists");
 
@@ -39,14 +44,14 @@ namespace ProjektCzlowiekKomputer.Services
                     Name = model.Name,
                     UserGuid = Guid.NewGuid()   
                 };
-                var createUserResult = await userManager.CreateAsync(user, model.Password);
+                var createUserResult = await _userManager.CreateAsync(user, model.Password);
                 if (!createUserResult.Succeeded)
                     return (0, "User creation failed! Please check user details and try again.");
 
-                if (!await roleManager.RoleExistsAsync(role))
-                    await roleManager.CreateAsync(new IdentityRole(role));
+                if (!await _roleManager.RoleExistsAsync(role))
+                    await _roleManager.CreateAsync(new IdentityRole(role));
 
-                await  userManager.AddToRoleAsync(user, role);
+                await _userManager.AddToRoleAsync(user, role);
 
                 List<CreateShelveDto> shelveDto = new List<CreateShelveDto>
                 {
@@ -74,13 +79,13 @@ namespace ProjektCzlowiekKomputer.Services
 
         public async Task<(int, string)> Login(LoginModel model)
         {
-            var user = await userManager.FindByNameAsync(model.Username);
+            var user = await _userManager.FindByNameAsync(model.Username);
             if (user == null)
                 return (0, "Invalid username");
-            if (!await userManager.CheckPasswordAsync(user, model.Password))
+            if (!await _userManager.CheckPasswordAsync(user, model.Password))
                 return (0, "Invalid password");
 
-            var userRoles = await userManager.GetRolesAsync(user);
+            var userRoles = await _userManager.GetRolesAsync(user);
             var authClaims = new List<Claim>
             {
                new Claim(ClaimTypes.Name, user.UserName),
@@ -96,6 +101,39 @@ namespace ProjektCzlowiekKomputer.Services
             return (1, token);
         }
 
+
+        public async Task<(bool Succeeded, string NewPassword)> ResetPasswordAsync(ResetPasswordModel model)
+        {
+            try
+            {
+                var userEmail = await _userManager.FindByEmailAsync(model.Email);
+                var userUsername = await _userManager.FindByNameAsync(model.UserName);
+
+                if (userEmail == null || userUsername == null || userUsername.Id != userEmail.Id)
+                {
+                    return (false, null);
+                }
+                var token = await _userManager.GeneratePasswordResetTokenAsync(userEmail);
+                var newPassword = GenerateRandomPassword();
+                var resetPasswordResult = await _userManager.ResetPasswordAsync(userEmail, token, newPassword);
+                return resetPasswordResult.Succeeded ? (true, newPassword) : (false, null);
+            }
+            catch (Exception e)
+            {
+                return (false, null);
+            }
+        }
+
+
+
+        private string GenerateRandomPassword()
+        {
+            const int length = 12;
+            const string validChars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@$?_-";
+            var random = new Random();
+            return new string(Enumerable.Repeat(validChars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
 
         private string GenerateToken(IEnumerable<Claim> claims)
         {
@@ -115,6 +153,60 @@ namespace ProjektCzlowiekKomputer.Services
             return tokenHandler.WriteToken(token);
         }
 
+        public async Task<CrudOperationResult<UpdateProfileModel>> UpdateProfile(UpdateProfileModel model, Guid guid)
+        {
+            try
+            {
+                var user = await _db.Users.SingleOrDefaultAsync(x => x.UserGuid == guid);
+                if (user == null)
+                {
+                    return new CrudOperationResult<UpdateProfileModel>
+                    {
+                        Message = "User not found in the database",
+                        Status = CrudOperationResultStatus.Failure,
+                        Result = null
+                    };
+                }
+                user.Name = model.Name ?? user.Name;
+                user.PhoneNumber = model.PhoneNumber ?? user.PhoneNumber;
+
+                var result = await _userManager.UpdateAsync(user);
+
+                if (!result.Succeeded)
+                {
+                    return new CrudOperationResult<UpdateProfileModel>
+                    {
+                        Message = "Error updating user",
+                        Status = CrudOperationResultStatus.Failure,
+                        Result = null
+                    };
+                }
+
+                var updatedProfile = new UpdateProfileModel
+                {
+                    Name = user.Name,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber
+                };
+
+                return new CrudOperationResult<UpdateProfileModel>
+                {
+                    Message = "User updated successfully",
+                    Status = CrudOperationResultStatus.Success,
+                    Result = updatedProfile
+                };
+            }
+            catch (Exception e)
+            {
+                
+                return new CrudOperationResult<UpdateProfileModel>
+                {
+                    Message = $"An error occurred while updating the user profile {e.Message}",
+                    Status = CrudOperationResultStatus.Failure,
+                    Result = null
+                };
+            }
+        }
 
     }
 }
