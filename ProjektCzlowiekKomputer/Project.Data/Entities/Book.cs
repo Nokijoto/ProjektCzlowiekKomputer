@@ -47,6 +47,7 @@ namespace Project.Data.Entities
 
 
         public ICollection<BooksAuthors> BooksAuthors { get; set; }
+        public ICollection<BookShelves> BookShelves { get; set; }
 
 
     }

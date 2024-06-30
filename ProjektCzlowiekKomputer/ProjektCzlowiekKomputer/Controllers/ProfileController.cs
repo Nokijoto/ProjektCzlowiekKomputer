@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Project.Data.Models;
 using ProjektCzlowiekKomputer.Interfaces;
 
@@ -6,12 +7,13 @@ namespace ProjektCzlowiekKomputer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    [Authorize]
+    public class ProfileController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly ILogger<AuthController> _logger;
+        private readonly ILogger<ProfileController> _logger;
 
-        public AuthController(IAuthService authService, ILogger<AuthController> logger)
+        public ProfileController(IAuthService authService, ILogger<ProfileController> logger)
         {
             _authService = authService;
             _logger = logger;
@@ -20,6 +22,7 @@ namespace ProjektCzlowiekKomputer.Controllers
 
         [HttpPost]
         [Route("Login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginModel model)
         {
             try
@@ -40,6 +43,7 @@ namespace ProjektCzlowiekKomputer.Controllers
 
         [HttpPost]
         [Route("Register")]
+        [AllowAnonymous]
         public async Task<IActionResult> Register(RegistrationModel model)
         {
             try
@@ -63,6 +67,7 @@ namespace ProjektCzlowiekKomputer.Controllers
 
         [HttpPost]
         [Route("RegisterAdmin")]
+        [AllowAnonymous]
         public async Task<IActionResult> RegisterAdmin(RegistrationModel model)
         {
             try
@@ -83,5 +88,6 @@ namespace ProjektCzlowiekKomputer.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
     }
 }
