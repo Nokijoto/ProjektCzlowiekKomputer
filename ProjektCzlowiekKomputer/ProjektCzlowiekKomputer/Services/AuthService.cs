@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using Project.CrossCutting.Dtos;
+using Project.CrossCutting.Dtos.CreateDto;
 using Project.Data.Models;
 using ProjektCzlowiekKomputer.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,37 +14,62 @@ namespace ProjektCzlowiekKomputer.Services
     {
         private readonly UserManager<UserModel> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
+        private readonly IShelveService _shelveService;
         private readonly IConfiguration _configuration;
-        public AuthService(UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
+        public AuthService(UserManager<UserModel> userManager, RoleManager<IdentityRole> roleManager, IConfiguration configuration, IShelveService shelveService)
         {
             this.userManager = userManager;
             this.roleManager = roleManager;
             _configuration = configuration;
-
+            _shelveService = shelveService;
         }
         public async Task<(int, string)> Registeration(RegistrationModel model, string role)
         {
-            var userExists = await userManager.FindByNameAsync(model.Username);
-            if (userExists != null)
-                return (0, "User already exists");
-
-            UserModel user = new UserModel()
+            try
             {
-                Email = model.Email,
-                SecurityStamp = Guid.NewGuid().ToString(),
-                UserName = model.Username,
-                Name = model.Name
-            };
-            var createUserResult = await userManager.CreateAsync(user, model.Password);
-            if (!createUserResult.Succeeded)
-                return (0, "User creation failed! Please check user details and try again.");
+                var userExists = await userManager.FindByNameAsync(model.Username);
+                if (userExists != null)
+                    return (0, "User already exists");
 
-            if (!await roleManager.RoleExistsAsync(role))
-                await roleManager.CreateAsync(new IdentityRole(role));
+                UserModel user = new UserModel()
+                {
+                    Email = model.Email,
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    UserName = model.Username,
+                    Name = model.Name,
+                    UserGuid = Guid.NewGuid()   
+                };
+                var createUserResult = await userManager.CreateAsync(user, model.Password);
+                if (!createUserResult.Succeeded)
+                    return (0, "User creation failed! Please check user details and try again.");
 
-            userManager.AddToRoleAsync(user, role);
+                if (!await roleManager.RoleExistsAsync(role))
+                    await roleManager.CreateAsync(new IdentityRole(role));
 
-            return (1, "User created successfully!");
+                await  userManager.AddToRoleAsync(user, role);
+
+                List<CreateShelveDto> shelveDto = new List<CreateShelveDto>
+                {
+                    new CreateShelveDto { Name = "Read", Description = "Books to read" },
+                    new CreateShelveDto { Name = "Reading", Description = "Books currently reading" },
+                    new CreateShelveDto { Name = "Favorite", Description = "Favorite books" },
+                    new CreateShelveDto { Name = "Want to read", Description = "Books want to read" }
+                };
+                foreach (var shelve in shelveDto)
+                {
+                    await _shelveService.AddShelve(shelve, user.UserGuid);
+                }
+
+                return (1, "User created successfully!");
+            }
+            catch (Exception e)
+            {
+               if(e.InnerException.Message!=null)
+                {
+                    return (0, e.InnerException.Message);
+                }
+                return (0, e.Message);
+            }
         }
 
         public async Task<(int, string)> Login(LoginModel model)
@@ -57,6 +84,7 @@ namespace ProjektCzlowiekKomputer.Services
             var authClaims = new List<Claim>
             {
                new Claim(ClaimTypes.Name, user.UserName),
+               new Claim("userGuid",user.UserGuid.ToString()),
                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
@@ -86,6 +114,8 @@ namespace ProjektCzlowiekKomputer.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+
+
     }
 }
 

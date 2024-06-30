@@ -87,12 +87,19 @@ namespace ProjektCzlowiekKomputer.Services
             try
             {
                 var user = await _db.Users.SingleOrDefaultAsync(x => x.UserGuid == userGuid);
-
-
+                if (user == null)
+                {
+                    return new CrudOperationResult<ShelveDto>()
+                    {
+                        Message = "User not found in the database",
+                        Status = CrudOperationResultStatus.Failure,
+                        Result = null
+                    };
+                }
 
                 var shelve = _mapper.Map<Shelves>(shelveDto);
                 shelve.UpdatedBy = null;
-                shelve.CreatedBy = "API";
+                shelve.CreatedBy = user.UserName;
                 shelve.CreatedAt = DateTime.Now;
                 shelve.UpdatedAt = DateTime.Now;
                 shelve.Guid = Guid.NewGuid();
@@ -101,7 +108,7 @@ namespace ProjektCzlowiekKomputer.Services
                 await _db.SaveChangesAsync();
 
                 var newShelve = await _db.Shelves.FirstOrDefaultAsync(x => x.Guid == shelve.Guid);
-                var userShelve= new UserShelves()
+                var userShelve = new UserShelves()
                 {
                     Shelves = newShelve,
                     User = user,
@@ -115,6 +122,9 @@ namespace ProjektCzlowiekKomputer.Services
                     UpdatedBy = null,
                     Guid = Guid.NewGuid()
                 };
+
+                await _db.UserShelves.AddAsync(userShelve);
+                await _db.SaveChangesAsync();
 
                 return new CrudOperationResult<ShelveDto>()
                 {
@@ -134,11 +144,11 @@ namespace ProjektCzlowiekKomputer.Services
             }
         }
 
-        public async Task<CrudOperationResult<ShelveDto>> DeleteShelve(Guid guid)
+        public async Task<CrudOperationResult<ShelveDto>> DeleteShelve(Guid id, Guid userGuid)
         {
             try
             {
-               _db.Shelves.Remove(await _db.Shelves.FirstOrDefaultAsync(x => x.Guid == guid));
+               _db.Shelves.Remove(await _db.Shelves.FirstOrDefaultAsync(x => x.Guid == id));
                 await _db.SaveChangesAsync();
                 return new CrudOperationResult<ShelveDto>()
                 {
@@ -267,6 +277,41 @@ namespace ProjektCzlowiekKomputer.Services
             }
         }
 
+        public Task<CrudOperationResult<List<ShelveDto>>> GetUserShelves(Guid userGuid)
+        {
+            try
+            {
+                var user = _db.Users.FirstOrDefault(x => x.UserGuid == userGuid);
+                if (user == null)
+                {
+                    return Task.FromResult(new CrudOperationResult<List<ShelveDto>>()
+                    {
+                        Message = "User not found",
+                        Status = CrudOperationResultStatus.Failure,
+                        Result = null
+                    });
+                }
+                var userShelves = _db.UserShelves.Where(x => x.UserGuid == user.UserGuid).Select(x => x.Shelves).ToList();
+                var shelveDtos = _mapper.Map<List<ShelveDto>>(userShelves);
+                return Task.FromResult(new CrudOperationResult<List<ShelveDto>>()
+                {
+                    Message = "User Shelves fetched successfully",
+                    Status = CrudOperationResultStatus.Success,
+                    Result = shelveDtos
+                });
+            }
+            catch (Exception e)
+            {
+                return Task.FromResult(new CrudOperationResult<List<ShelveDto>>()
+                {
+                    Message = $"User Shelves fetch failure Error: {e.Message}",
+                    Status = CrudOperationResultStatus.Failure,
+                    Result = null
+                });
+            }
+        }
+
+
         public async Task<CrudOperationResult<BookShelvesDto>> RemoveBookFromShelve(Guid shelveGuid, Guid bookGuid)
         {
             try
@@ -307,7 +352,7 @@ namespace ProjektCzlowiekKomputer.Services
         }
 
 
-        public async Task<CrudOperationResult<ShelveDto>> UpdateShelve(UpdateShelveDto shelveDto)
+        public async Task<CrudOperationResult<ShelveDto>> UpdateShelve(UpdateShelveDto shelveDto, Guid userGuid)
         {
             try
             {
@@ -318,6 +363,26 @@ namespace ProjektCzlowiekKomputer.Services
                     return new CrudOperationResult<ShelveDto>()
                     {
                         Message = "Shelve not found",
+                        Status = CrudOperationResultStatus.Failure,
+                        Result = null
+                    };
+                }
+                var user= await _db.Users.FirstOrDefaultAsync(x => x.UserGuid == userGuid);
+                if (user == null)
+                {
+                    return new CrudOperationResult<ShelveDto>()
+                    {
+                        Message = "User not found",
+                        Status = CrudOperationResultStatus.Failure,
+                        Result = null
+                    };
+                }
+                var Usershelves = await _db.UserShelves.FirstOrDefaultAsync(x => x.ShelvesGuid == shelve.Guid && x.UserGuid == user.UserGuid);
+                if(Usershelves == null)
+                {
+                    return new CrudOperationResult<ShelveDto>()
+                    {
+                        Message = "User does not have access to this shelve",
                         Status = CrudOperationResultStatus.Failure,
                         Result = null
                     };
@@ -347,5 +412,6 @@ namespace ProjektCzlowiekKomputer.Services
                 };
             }
         }
+
     }
 }

@@ -7,8 +7,9 @@ namespace ProjektCzlowiekKomputer.Interfaces
     public interface IShelveService
     {
         Task<CrudOperationResult<ShelveDto>> AddShelve(CreateShelveDto shelveDto,Guid userGuid);
-        Task<CrudOperationResult<ShelveDto>> UpdateShelve(UpdateShelveDto shelveDto);
-        Task<CrudOperationResult<ShelveDto>> DeleteShelve(Guid id); 
+        Task<CrudOperationResult<ShelveDto>> UpdateShelve(UpdateShelveDto shelveDto, Guid userGuid);
+        Task<CrudOperationResult<ShelveDto>> DeleteShelve(Guid id, Guid userGuid); 
+        Task<CrudOperationResult<List<ShelveDto>>> GetUserShelves(Guid userGuid);
         Task<CrudOperationResult<ShelveDto>> GetShelveById(int id);
         Task<CrudOperationResult<ShelveDto>> GetShelveByGuid(Guid guid);
         Task<CrudOperationResult<List<ShelveDto>>> GetShelves();

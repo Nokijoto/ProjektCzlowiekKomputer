@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Project.CrossCutting.Common;
 using Project.CrossCutting.Dtos.CreateDto;
 using Project.Data.Models;
 using ProjektCzlowiekKomputer.Interfaces;
+using System.Security.Claims;
 
 namespace ProjektCzlowiekKomputer.Controllers
 {
@@ -20,15 +22,34 @@ namespace ProjektCzlowiekKomputer.Controllers
             _shelveService = shelveService;
             _userManager = userManager;
         }
-        [HttpGet]
-        [Authorize]
+        [HttpGet("admin/GetShelves")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetShelves()
         {
             var result = await _shelveService.GetShelves();
             return Ok(result);
         }
-        [HttpGet("guid")]
+
+        //[HttpGet("admin/Shelve/{shelveId:guid}")]
+        //[Authorize(Roles = "Admin")]
+        //public async Task<IActionResult> GetUserShelve(Guid shelveId)
+        //{
+        //    var result = await _shelveService.GetUserShelves(shelveId);
+        //    return Ok(result);
+        //}
+
+        [HttpGet("/user/getmyshelves")]
         [Authorize]
+        public async Task<IActionResult> GetMyShelves()
+        {
+            var userGuidClaim = User.FindFirst("userGuid");
+            var userGuid = Guid.Parse(userGuidClaim.Value);
+            var result = await _shelveService.GetUserShelves(userGuid);
+            return Ok(result);
+        }
+
+        [HttpGet("user/{shelveId:guid}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetShelve(Guid shelveId)
         {
             var result = await _shelveService.GetShelveByGuid(shelveId);
@@ -38,27 +59,33 @@ namespace ProjektCzlowiekKomputer.Controllers
         [Authorize]
         public async Task<IActionResult> CreateShelve([FromBody] CreateShelveDto createShelveDto)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if(user == null)
-            {
-                return BadRequest("User not found");
-            }
-            Guid userGuid = user.UserGuid;
+            var userGuidClaim = User.FindFirst("userGuid");
+            var userGuid = Guid.Parse(userGuidClaim.Value);
             var result = await _shelveService.AddShelve(createShelveDto, userGuid);
-            return Ok(result);
+
+            if (result.Status == CrudOperationResultStatus.Failure)
+            {
+                return BadRequest(result.Message);
+            }
+
+            return Ok(result.Result);
         }
         [HttpDelete]
         [Authorize]
         public async Task<IActionResult> DeleteShelve(Guid shelveId)
         {
-            var result = await _shelveService.DeleteShelve(shelveId);
+            var userGuidClaim = User.FindFirst("userGuid");
+            var userGuid = Guid.Parse(userGuidClaim.Value);
+            var result = await _shelveService.DeleteShelve(shelveId, userGuid);
             return Ok(result);
         }
         [HttpPut]
         [Authorize]
         public async Task<IActionResult> UpdateShelve([FromBody] UpdateShelveDto updateShelveDto)
         {
-            var result = await _shelveService.UpdateShelve(updateShelveDto);
+            var userGuidClaim = User.FindFirst("userGuid");
+            var userGuid = Guid.Parse(userGuidClaim.Value);
+            var result = await _shelveService.UpdateShelve(updateShelveDto, userGuid);
             return Ok(result);
         }
         [HttpDelete]

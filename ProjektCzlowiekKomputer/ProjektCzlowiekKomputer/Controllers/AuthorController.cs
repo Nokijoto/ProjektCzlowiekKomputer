@@ -54,6 +54,7 @@ namespace ProjektCzlowiekKomputer.Controllers
 
         [HttpPost]
         [Route("AddAuthorsBooks")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddAuthorsBooks(Guid bookGuid, Guid authorGuid)
         {
             var result = await _authorService.AddAuthorsBooksAsync(bookGuid, authorGuid);
