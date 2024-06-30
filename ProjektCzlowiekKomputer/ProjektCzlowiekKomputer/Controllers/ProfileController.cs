@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Project.Data.Models;
 using ProjektCzlowiekKomputer.Interfaces;
@@ -89,5 +90,41 @@ namespace ProjektCzlowiekKomputer.Controllers
             }
         }
 
+        [HttpPost("ChangePassword")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var (succeeded, newPassword) = await _authService.ResetPasswordAsync(model);
+            if (!succeeded)
+            {
+                return BadRequest("Error while resetting the password.");
+            }
+
+            return Ok(new { Message = "Password has been reset.", NewPassword = newPassword });
+        }
+
+        [HttpPost]
+        [Route("UpdateProfile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest("Invalid payload");
+                var userGuidClaim = User.FindFirst("userGuid");
+                var userGuid = Guid.Parse(userGuidClaim.Value);
+                return Ok(await _authService.UpdateProfile(model, userGuid));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
     }
 }
